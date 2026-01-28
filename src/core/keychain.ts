@@ -15,8 +15,3 @@ export async function getRP(origin: string): Promise<RPConfig | null> {
 export async function deleteRP(origin: string): Promise<boolean> {
   return await keytar.deletePassword(SERVICE_NAME, origin);
 }
-
-export async function listRPs(): Promise<string[]> {
-  const credentials = await keytar.findCredentials(SERVICE_NAME);
-  return credentials.map((cred) => cred.account);
-}

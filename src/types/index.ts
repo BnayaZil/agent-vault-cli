@@ -19,3 +19,9 @@ export interface BrowserConnection {
   browser: import('playwright').Browser;
   page: import('playwright').Page;
 }
+
+export interface VaultConfig {
+  defaultUsername?: string;
+}
+
+export type ConfigKey = keyof VaultConfig;
