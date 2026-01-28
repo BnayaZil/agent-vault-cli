@@ -11,3 +11,11 @@ export function isValidOrigin(origin: string): boolean {
     return false;
   }
 }
+
+export function extractAndValidateOrigin(url: string): string {
+  const origin = extractOrigin(url);
+  if (!isValidOrigin(origin)) {
+    throw new Error('Invalid page origin');
+  }
+  return origin;
+}

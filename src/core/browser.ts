@@ -1,8 +1,34 @@
 import { chromium } from 'playwright';
 import type { BrowserConnection } from '../types/index.js';
 
+const CDP_TIMEOUT_MS = 10000;
+
+export function validateCDPEndpoint(endpoint: string): void {
+  try {
+    const url = new URL(endpoint);
+    if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+      throw new Error('CDP endpoint must use ws:// or wss:// protocol');
+    }
+    if (!url.hostname) {
+      throw new Error('CDP endpoint must have a valid hostname');
+    }
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error('Invalid CDP endpoint URL');
+    }
+    throw error;
+  }
+}
+
 export async function connectToBrowser(cdpEndpoint: string): Promise<BrowserConnection> {
-  const browser = await chromium.connectOverCDP(cdpEndpoint);
+  validateCDPEndpoint(cdpEndpoint);
+
+  const browser = await Promise.race([
+    chromium.connectOverCDP(cdpEndpoint),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('CDP connection timeout')), CDP_TIMEOUT_MS)
+    ),
+  ]);
   const contexts = browser.contexts();
 
   if (contexts.length === 0) {

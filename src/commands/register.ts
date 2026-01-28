@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { connectToBrowser, fillField, validateSelector } from '../core/browser.js';
-import { extractOrigin } from '../core/origin.js';
+import { extractAndValidateOrigin } from '../core/origin.js';
 import { storeRP, getRP } from '../core/keychain.js';
 import { generatePassword } from '../core/crypto.js';
 import { getConfigValue } from '../core/config.js';
@@ -23,7 +23,7 @@ export async function register(options: RegisterOptions): Promise<void> {
 
   try {
     const currentUrl = page.url();
-    const origin = extractOrigin(currentUrl);
+    const origin = extractAndValidateOrigin(currentUrl);
 
     // Validate selectors exist on page
     const usernameValid = await validateSelector(page, options.usernameSelector);
@@ -107,8 +107,8 @@ export async function register(options: RegisterOptions): Promise<void> {
       password = options.password;
     } else if (options.generatePassword) {
       password = generatePassword();
-      console.log(`Generated password: ${password}`);
-      console.log('(Copy this password and save it somewhere safe!)');
+      console.log(`Generated password: ${password.slice(0, 2)}${'*'.repeat(password.length - 4)}${password.slice(-2)}`);
+      console.log('(Full password will be stored securely in keychain)');
     } else {
       const { passwordOption } = await inquirer.prompt<{ passwordOption: string }>([
         {
@@ -124,8 +124,8 @@ export async function register(options: RegisterOptions): Promise<void> {
 
       if (passwordOption === 'generate') {
         password = generatePassword();
-        console.log(`Generated password: ${password}`);
-        console.log('(Copy this password and save it somewhere safe!)');
+        console.log(`Generated password: ${password.slice(0, 2)}${'*'.repeat(password.length - 4)}${password.slice(-2)}`);
+        console.log('(Full password will be stored securely in keychain)');
       } else {
         const { enteredPassword } = await inquirer.prompt<{ enteredPassword: string }>([
           {
@@ -157,9 +157,12 @@ export async function register(options: RegisterOptions): Promise<void> {
       credentials: { username, password },
     });
 
-    console.log(`✓ Registered credentials for ${origin}`);
+    console.log('Credentials registered successfully');
     console.log('Complete signup/login in browser.');
   } finally {
+    // Clear sensitive data from memory
+    username = '';
+    password = '';
     await browser.close();
   }
 }
