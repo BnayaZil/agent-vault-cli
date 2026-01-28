@@ -3,13 +3,19 @@ import { connectToBrowser, fillField, validateSelector } from '../core/browser.j
 import { extractOrigin } from '../core/origin.js';
 import { storeRP, getRP } from '../core/keychain.js';
 import { generatePassword } from '../core/crypto.js';
+import { getConfigValue } from '../core/config.js';
 import type { Selectors } from '../types/index.js';
 
-interface RegisterOptions {
+export interface RegisterOptions {
   cdp: string;
   usernameSelector: string;
   passwordSelector: string;
   submitSelector?: string;
+  // Non-interactive options
+  username?: string;
+  password?: string;
+  generatePassword?: boolean;
+  force?: boolean;
 }
 
 export async function register(options: RegisterOptions): Promise<void> {
@@ -41,75 +47,97 @@ export async function register(options: RegisterOptions): Promise<void> {
     // Check if already registered
     const existing = await getRP(origin);
     if (existing) {
-      const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>([
+      if (options.force) {
+        // Non-interactive: overwrite without prompting
+      } else {
+        const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>([
+          {
+            type: 'confirm',
+            name: 'overwrite',
+            message: `Credentials already exist for ${origin}. Overwrite?`,
+            default: false,
+          },
+        ]);
+
+        if (!overwrite) {
+          console.log('Registration cancelled.');
+          return;
+        }
+      }
+    }
+
+    // Confirm registration (skip if force or username provided non-interactively)
+    if (!options.force && !options.username) {
+      const { confirm } = await inquirer.prompt<{ confirm: boolean }>([
         {
           type: 'confirm',
-          name: 'overwrite',
-          message: `Credentials already exist for ${origin}. Overwrite?`,
-          default: false,
+          name: 'confirm',
+          message: `Register credentials for ${origin}?`,
+          default: true,
         },
       ]);
 
-      if (!overwrite) {
+      if (!confirm) {
         console.log('Registration cancelled.');
         return;
       }
     }
 
-    // Confirm registration
-    const { confirm } = await inquirer.prompt<{ confirm: boolean }>([
-      {
-        type: 'confirm',
-        name: 'confirm',
-        message: `Register credentials for ${origin}?`,
-        default: true,
-      },
-    ]);
-
-    if (!confirm) {
-      console.log('Registration cancelled.');
-      return;
+    // Get username
+    let username: string;
+    if (options.username) {
+      username = options.username;
+    } else {
+      const defaultUsername = await getConfigValue('defaultUsername');
+      const response = await inquirer.prompt<{ username: string }>([
+        {
+          type: 'input',
+          name: 'username',
+          message: 'Enter username/email:',
+          default: defaultUsername,
+          validate: (input) => input.length > 0 || 'Username is required',
+        },
+      ]);
+      username = response.username;
     }
 
-    // Prompt for username
-    const { username } = await inquirer.prompt<{ username: string }>([
-      {
-        type: 'input',
-        name: 'username',
-        message: 'Enter username/email:',
-        validate: (input) => input.length > 0 || 'Username is required',
-      },
-    ]);
-
-    // Prompt for password option
-    const { passwordOption } = await inquirer.prompt<{ passwordOption: string }>([
-      {
-        type: 'list',
-        name: 'passwordOption',
-        message: 'Password:',
-        choices: [
-          { name: 'Generate secure password', value: 'generate' },
-          { name: 'Enter existing password', value: 'enter' },
-        ],
-      },
-    ]);
-
+    // Get password
     let password: string;
-    if (passwordOption === 'generate') {
+    if (options.password) {
+      password = options.password;
+    } else if (options.generatePassword) {
       password = generatePassword();
       console.log(`Generated password: ${password}`);
       console.log('(Copy this password and save it somewhere safe!)');
     } else {
-      const { enteredPassword } = await inquirer.prompt<{ enteredPassword: string }>([
+      const { passwordOption } = await inquirer.prompt<{ passwordOption: string }>([
         {
-          type: 'password',
-          name: 'enteredPassword',
-          message: 'Enter password:',
-          mask: '*',
-          validate: (input) => input.length > 0 || 'Password is required',
+          type: 'list',
+          name: 'passwordOption',
+          message: 'Password:',
+          choices: [
+            { name: 'Generate secure password', value: 'generate' },
+            { name: 'Enter existing password', value: 'enter' },
+          ],
         },
       ]);
-      password = enteredPassword;
+
+      if (passwordOption === 'generate') {
+        password = generatePassword();
+        console.log(`Generated password: ${password}`);
+        console.log('(Copy this password and save it somewhere safe!)');
+      } else {
+        const { enteredPassword } = await inquirer.prompt<{ enteredPassword: string }>([
+          {
+            type: 'password',
+            name: 'enteredPassword',
+            message: 'Enter password:',
+            mask: '*',
+            validate: (input) => input.length > 0 || 'Password is required',
+          },
+        ]);
+        password = enteredPassword;
+      }
     }
 
     const selectors: Selectors = {

@@ -29,3 +29,6 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Planning
+plan.md

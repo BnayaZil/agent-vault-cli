@@ -3,8 +3,8 @@
 import { Command } from 'commander';
 import { register } from './commands/register.js';
 import { login } from './commands/login.js';
-import { list } from './commands/list.js';
 import { deleteCommand } from './commands/delete.js';
+import { config } from './commands/config.js';
 
 const program = new Command();
 
@@ -20,6 +20,10 @@ program
   .requiredOption('--username-selector <selector>', 'CSS selector for username/email field')
   .requiredOption('--password-selector <selector>', 'CSS selector for password field')
   .option('--submit-selector <selector>', 'CSS selector for submit button')
+  .option('--username <username>', 'Username/email (non-interactive)')
+  .option('--password <password>', 'Password (non-interactive)')
+  .option('--generate-password', 'Generate a secure password (non-interactive)')
+  .option('-f, --force', 'Skip confirmation prompts')
   .action(async (options) => {
     try {
       await register({
@@ -27,6 +31,10 @@ program
         usernameSelector: options.usernameSelector,
         passwordSelector: options.passwordSelector,
         submitSelector: options.submitSelector,
+        username: options.username,
+        password: options.password,
+        generatePassword: options.generatePassword,
+        force: options.force,
       });
     } catch (error) {
       console.error('Error:', error instanceof Error ? error.message : error);
@@ -52,18 +60,6 @@ program
   });
 
 program
-  .command('list')
-  .description('List all registered sites')
-  .action(async () => {
-    try {
-      await list();
-    } catch (error) {
-      console.error('Error:', error instanceof Error ? error.message : error);
-      process.exit(1);
-    }
-  });
-
-program
   .command('delete')
   .description('Delete credentials for a site')
   .requiredOption('--origin <url>', 'Origin to delete (e.g., https://github.com)')
@@ -74,6 +70,58 @@ program
         origin: options.origin,
         force: options.force,
       });
+    } catch (error) {
+      console.error('Error:', error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+const configCmd = program
+  .command('config')
+  .description('Manage vault configuration');
+
+configCmd
+  .command('list')
+  .description('List all configuration values')
+  .action(async () => {
+    try {
+      await config({ action: 'list' });
+    } catch (error) {
+      console.error('Error:', error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+configCmd
+  .command('get <key>')
+  .description('Get a configuration value')
+  .action(async (key) => {
+    try {
+      await config({ action: 'get', key });
+    } catch (error) {
+      console.error('Error:', error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+configCmd
+  .command('set <key> <value>')
+  .description('Set a configuration value')
+  .action(async (key, value) => {
+    try {
+      await config({ action: 'set', key, value });
+    } catch (error) {
+      console.error('Error:', error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+configCmd
+  .command('unset <key>')
+  .description('Remove a configuration value')
+  .action(async (key) => {
+    try {
+      await config({ action: 'unset', key });
     } catch (error) {
       console.error('Error:', error instanceof Error ? error.message : error);
       process.exit(1);
