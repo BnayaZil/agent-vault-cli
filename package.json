@@ -1,0 +1,47 @@
+{
+  "name": "@agent-vault/cli",
+  "version": "0.1.0",
+  "description": "Secure credential vault CLI for AI agents - fills login forms via CDP without exposing credentials",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "vault": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "vault",
+    "credentials",
+    "agent",
+    "ai",
+    "keychain",
+    "security",
+    "cdp",
+    "playwright"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "inquirer": "^9.2.23",
+    "keytar": "^7.9.0",
+    "nanoid": "^5.0.7",
+    "playwright": "^1.48.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
