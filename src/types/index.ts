@@ -22,6 +22,10 @@ export interface BrowserConnection {
 
 export interface VaultConfig {
   defaultUsername?: string;
+  /** Allow HTTP origins (insecure - not recommended) */
+  allowHttp?: string;
+  /** Comma-separated list of allowed CDP hostnames */
+  cdpAllowlist?: string;
 }
 
 export type ConfigKey = keyof VaultConfig;
