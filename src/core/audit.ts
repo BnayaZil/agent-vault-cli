@@ -9,7 +9,6 @@ export type AuditEvent =
   | 'credential_stored'
   | 'credential_retrieved'
   | 'credential_deleted'
-  | 'credential_rotated'
   | 'login_filled'
   | 'config_changed'
   | 'rate_limit_exceeded';

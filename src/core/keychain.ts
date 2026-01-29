@@ -108,32 +108,3 @@ export async function deleteRP(origin: string): Promise<boolean> {
   await logAuditEvent('credential_deleted', { origin, success: result });
   return result;
 }
-
-/**
- * Update only the password for an existing credential (rotation)
- */
-export async function rotatePassword(origin: string, newPassword: string): Promise<boolean> {
-  await checkRateLimit('rotate_credentials');
-
-  const existing = await getRP(origin);
-  if (!existing) {
-    await logAuditEvent('credential_rotated', {
-      origin,
-      details: 'No existing credentials',
-      success: false,
-    });
-    return false;
-  }
-
-  const updated: RPConfig = {
-    ...existing,
-    credentials: {
-      ...existing.credentials,
-      password: newPassword,
-    },
-  };
-
-  await keytar.setPassword(SERVICE_NAME, origin, JSON.stringify(updated));
-  await logAuditEvent('credential_rotated', { origin, success: true });
-  return true;
-}
