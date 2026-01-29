@@ -32,3 +32,9 @@ temp/
 
 # Planning
 plan.md
+
+# Cursor agents and skills
+.cursor/agents/
+.cursor/skills/
+.agents/
+.opencode/
