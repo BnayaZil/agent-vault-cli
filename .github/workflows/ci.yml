@@ -58,13 +58,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       
       - name: Install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install --no-package-lock
+        run: npm install --no-package-lock
         continue-on-error: false
-      
-      - name: Verify installation
-        run: npx --yes typescript@5.6.0 tsc --version && npx --yes vitest@2.1.0 vitest --version
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
