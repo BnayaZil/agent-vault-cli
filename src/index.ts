@@ -5,6 +5,7 @@ import { register } from './commands/register.js';
 import { login } from './commands/login.js';
 import { deleteCommand } from './commands/delete.js';
 import { config } from './commands/config.js';
+import { rotate } from './commands/rotate.js';
 
 const program = new Command();
 
@@ -24,6 +25,7 @@ program
   .option('--password <password>', 'Password (non-interactive)')
   .option('--generate-password', 'Generate a secure password (non-interactive)')
   .option('-f, --force', 'Skip confirmation prompts')
+  .option('--allow-http', 'Allow HTTP origins (insecure - not recommended)')
   .action(async (options) => {
     try {
       await register({
@@ -35,6 +37,7 @@ program
         password: options.password,
         generatePassword: options.generatePassword,
         force: options.force,
+        allowHttp: options.allowHttp,
       });
     } catch (error) {
       console.error('Error:', error instanceof Error ? error.message : error);
@@ -68,6 +71,27 @@ program
     try {
       await deleteCommand({
         origin: options.origin,
+        force: options.force,
+      });
+    } catch (error) {
+      console.error('Error:', error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('rotate')
+  .description('Rotate password for a registered site')
+  .requiredOption('--origin <url>', 'Origin to rotate password for (e.g., https://github.com)')
+  .option('--generate-password', 'Generate a new secure password')
+  .option('--password <password>', 'New password (non-interactive)')
+  .option('-f, --force', 'Skip confirmation prompt')
+  .action(async (options) => {
+    try {
+      await rotate({
+        origin: options.origin,
+        generatePassword: options.generatePassword,
+        password: options.password,
         force: options.force,
       });
     } catch (error) {

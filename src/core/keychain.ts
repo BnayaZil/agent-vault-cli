@@ -1,31 +1,139 @@
 import keytar from 'keytar';
+import { z } from 'zod';
 import type { RPConfig } from '../types/index.js';
+import { logAuditEvent } from './audit.js';
+import { checkRateLimit } from './ratelimit.js';
 
 const SERVICE_NAME = 'agent-vault';
 
+// Zod schema for strict validation of stored credentials
+const SelectorsSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+  submit: z.string().optional(),
+});
+
+const CredentialsSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+});
+
+const RPConfigSchema = z.object({
+  origin: z.string().url(),
+  selectors: SelectorsSchema,
+  credentials: CredentialsSchema,
+});
+
+/**
+ * Validate RPConfig data against schema
+ */
+function validateRPConfig(data: unknown): RPConfig | null {
+  const result = RPConfigSchema.safeParse(data);
+  if (!result.success) {
+    return null;
+  }
+  return result.data;
+}
+
 export async function storeRP(config: RPConfig): Promise<void> {
-  await keytar.setPassword(SERVICE_NAME, config.origin, JSON.stringify(config));
+  // Rate limit credential storage
+  await checkRateLimit('store_credentials');
+
+  // Validate config before storing
+  const validated = validateRPConfig(config);
+  if (!validated) {
+    throw new Error('Invalid credential configuration');
+  }
+
+  await keytar.setPassword(SERVICE_NAME, config.origin, JSON.stringify(validated));
+  await logAuditEvent('credential_stored', { origin: config.origin });
 }
 
 export async function getRP(origin: string): Promise<RPConfig | null> {
   try {
-    const data = await keytar.getPassword(SERVICE_NAME, origin);
-    if (!data) return null;
+    // Rate limit credential retrieval
+    await checkRateLimit('get_credentials');
 
-    const parsed = JSON.parse(data);
-    // Validate structure
-    if (!parsed.origin || !parsed.selectors || !parsed.credentials) {
-      console.error('Corrupted credential data detected');
+    const data = await keytar.getPassword(SERVICE_NAME, origin);
+    if (!data) {
+      await logAuditEvent('credential_retrieved', { origin, success: false });
       return null;
     }
-    return parsed as RPConfig;
-  } catch {
-    // Don't expose internal errors
-    console.error('Failed to retrieve credentials');
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(data);
+    } catch {
+      // Corrupted JSON data
+      await logAuditEvent('credential_retrieved', {
+        origin,
+        details: 'Corrupted data',
+        success: false,
+      });
+      return null;
+    }
+
+    // Validate with zod schema
+    const validated = validateRPConfig(parsed);
+    if (!validated) {
+      await logAuditEvent('credential_retrieved', {
+        origin,
+        details: 'Schema validation failed',
+        success: false,
+      });
+      return null;
+    }
+
+    await logAuditEvent('credential_retrieved', { origin, success: true });
+    return validated;
+  } catch (error) {
+    // Don't expose internal errors - use generic message
+    if (error instanceof Error && error.message.includes('Rate limit')) {
+      throw error; // Re-throw rate limit errors
+    }
+    await logAuditEvent('credential_retrieved', {
+      origin,
+      details: 'Internal error',
+      success: false,
+    });
     return null;
   }
 }
 
 export async function deleteRP(origin: string): Promise<boolean> {
-  return await keytar.deletePassword(SERVICE_NAME, origin);
+  // Rate limit credential deletion
+  await checkRateLimit('delete_credentials');
+
+  const result = await keytar.deletePassword(SERVICE_NAME, origin);
+  await logAuditEvent('credential_deleted', { origin, success: result });
+  return result;
+}
+
+/**
+ * Update only the password for an existing credential (rotation)
+ */
+export async function rotatePassword(origin: string, newPassword: string): Promise<boolean> {
+  await checkRateLimit('rotate_credentials');
+
+  const existing = await getRP(origin);
+  if (!existing) {
+    await logAuditEvent('credential_rotated', {
+      origin,
+      details: 'No existing credentials',
+      success: false,
+    });
+    return false;
+  }
+
+  const updated: RPConfig = {
+    ...existing,
+    credentials: {
+      ...existing.credentials,
+      password: newPassword,
+    },
+  };
+
+  await keytar.setPassword(SERVICE_NAME, origin, JSON.stringify(updated));
+  await logAuditEvent('credential_rotated', { origin, success: true });
+  return true;
 }
