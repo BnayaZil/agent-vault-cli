@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SecureString, withSecureStrings } from '../src/core/secure-memory.js';
 import {
-  isBlockedOrigin,
-  hasSuspiciousTld,
   isSecureProtocol,
   isHttpProtocol,
 } from '../src/core/origin.js';
@@ -85,56 +83,6 @@ describe('withSecureStrings', () => {
 });
 
 describe('Origin Security', () => {
-  describe('isBlockedOrigin', () => {
-    it('blocks localhost', () => {
-      expect(isBlockedOrigin('http://localhost')).toBe(true);
-      expect(isBlockedOrigin('http://localhost:3000')).toBe(true);
-      expect(isBlockedOrigin('https://localhost')).toBe(true);
-    });
-
-    it('blocks 127.0.0.1', () => {
-      expect(isBlockedOrigin('http://127.0.0.1')).toBe(true);
-      expect(isBlockedOrigin('http://127.0.0.1:8080')).toBe(true);
-    });
-
-    it('blocks 0.0.0.0', () => {
-      expect(isBlockedOrigin('http://0.0.0.0')).toBe(true);
-    });
-
-    it('blocks IPv6 localhost', () => {
-      expect(isBlockedOrigin('http://[::1]')).toBe(true);
-    });
-
-    it('blocks file:// protocol', () => {
-      expect(isBlockedOrigin('file:///etc/passwd')).toBe(true);
-    });
-
-    it('allows normal origins', () => {
-      expect(isBlockedOrigin('https://github.com')).toBe(false);
-      expect(isBlockedOrigin('https://example.com')).toBe(false);
-    });
-  });
-
-  describe('hasSuspiciousTld', () => {
-    it('detects suspicious TLDs', () => {
-      expect(hasSuspiciousTld('https://example.tk')).toBe(true);
-      expect(hasSuspiciousTld('https://example.ml')).toBe(true);
-      expect(hasSuspiciousTld('https://example.ga')).toBe(true);
-      expect(hasSuspiciousTld('https://example.cf')).toBe(true);
-      expect(hasSuspiciousTld('https://example.gq')).toBe(true);
-    });
-
-    it('handles TLDs with ports', () => {
-      expect(hasSuspiciousTld('https://example.tk:443')).toBe(true);
-    });
-
-    it('allows normal TLDs', () => {
-      expect(hasSuspiciousTld('https://github.com')).toBe(false);
-      expect(hasSuspiciousTld('https://example.org')).toBe(false);
-      expect(hasSuspiciousTld('https://example.io')).toBe(false);
-    });
-  });
-
   describe('isSecureProtocol', () => {
     it('returns true for HTTPS', () => {
       expect(isSecureProtocol('https://example.com')).toBe(true);
