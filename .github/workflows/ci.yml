@@ -27,10 +27,11 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: |
-          npm ci || npm install
-          ls -la node_modules/.bin/ || echo "node_modules/.bin not found"
-          npm list typescript vitest || true
+        run: npm install
+        continue-on-error: false
+      
+      - name: Verify installation
+        run: npx tsc --version && npx vitest --version
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -62,10 +63,11 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: |
-          npm ci || npm install
-          ls -la node_modules/.bin/ || echo "node_modules/.bin not found"
-          npm list typescript vitest || true
+        run: npm install
+        continue-on-error: false
+      
+      - name: Verify installation
+        run: npx tsc --version && npx vitest --version
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
