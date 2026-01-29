@@ -29,6 +29,9 @@ jobs:
         run: npm install --no-package-lock
         continue-on-error: false
       
+      - name: Build
+        run: npm run build
+      
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       
@@ -36,9 +39,6 @@ jobs:
         run: npm test -- --run
         env:
           CI: true
-      
-      - name: Build
-        run: npm run build
 
   test-windows:
     name: Test on Windows
@@ -61,6 +61,9 @@ jobs:
         run: npm install --no-package-lock
         continue-on-error: false
       
+      - name: Build
+        run: npm run build
+      
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       
@@ -70,6 +73,3 @@ jobs:
         env:
           CI: true
         continue-on-error: true
-      
-      - name: Build
-        run: npm run build
