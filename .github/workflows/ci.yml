@@ -24,14 +24,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
       
       - name: Install dependencies
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --no-package-lock
         continue-on-error: false
       
       - name: Verify installation
-        run: npx tsc --version && npx vitest --version
+        run: npx --yes typescript@5.6.0 tsc --version && npx --yes vitest@2.1.0 vitest --version
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -60,14 +61,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
       
       - name: Install dependencies
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --no-package-lock
         continue-on-error: false
       
       - name: Verify installation
-        run: npx tsc --version && npx vitest --version
+        run: npx --yes typescript@5.6.0 tsc --version && npx --yes vitest@2.1.0 vitest --version
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
