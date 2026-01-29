@@ -4,6 +4,7 @@ import { execSync, spawn, ChildProcess } from 'child_process';
 import { startTestServer, TestServer } from './fixtures/server.js';
 import { deleteRP, getRP } from '../src/core/keychain.js';
 import { loadConfig, saveConfig } from '../src/core/config.js';
+import { resetRateLimit } from '../src/core/ratelimit.js';
 import http from 'http';
 
 const CLI_PATH = './dist/index.js';
@@ -63,6 +64,9 @@ describe('E2E: Vault CLI', () => {
   let wsEndpoint: string;
 
   beforeAll(async () => {
+    // Reset rate limiter before tests
+    await resetRateLimit();
+
     // Start test servers on multiple ports
     for (const port of TEST_PORTS) {
       const server = await startTestServer(port);
@@ -139,6 +143,11 @@ describe('E2E: Vault CLI', () => {
     const testPort = TEST_PORTS[0];
     const testOrigin = `http://127.0.0.1:${testPort}`;
 
+    beforeEach(async () => {
+      // Reset rate limiter before each test
+      await resetRateLimit();
+    });
+
     afterEach(async () => {
       // Clean up credentials after each test
       try {
@@ -162,13 +171,14 @@ describe('E2E: Vault CLI', () => {
         `--password-selector "#password" ` +
         `--username "test@example.com" ` +
         `--password "TestPassword123!" ` +
+        `--allow-http ` +
         `--force`,
         { encoding: 'utf-8', cwd: process.cwd() }
       );
 
       await visualDelay(800); // Show the filled form
 
-      expect(output).toContain('Registered credentials for');
+      expect(output).toContain('Credentials registered successfully');
 
       // Verify credentials were stored
       const stored = await getRP(testOrigin);
@@ -198,14 +208,15 @@ describe('E2E: Vault CLI', () => {
         `--password-selector "#password" ` +
         `--username "generated@example.com" ` +
         `--generate-password ` +
+        `--allow-http ` +
         `--force`,
         { encoding: 'utf-8', cwd: process.cwd() }
       );
 
       await visualDelay(800);
 
-      expect(output).toContain('Generated password:');
-      expect(output).toContain('Registered credentials for');
+      expect(output).toContain('Secure password generated');
+      expect(output).toContain('Credentials registered successfully');
 
       // Verify credentials were stored with a generated password
       const stored = await getRP(testOrigin);
@@ -227,16 +238,21 @@ describe('E2E: Vault CLI', () => {
           `--password-selector "#password" ` +
           `--username "test@example.com" ` +
           `--password "TestPassword123!" ` +
+          `--allow-http ` +
           `--force`,
           { encoding: 'utf-8', cwd: process.cwd() }
         );
-      }).toThrow(/Username selector not found/);
+      }).toThrow(/Username.*not found/);
     });
   });
 
   describe('login command', () => {
     const testPort = TEST_PORTS[1];
     const testOrigin = `http://127.0.0.1:${testPort}`;
+
+    beforeEach(async () => {
+      await resetRateLimit();
+    });
 
     afterEach(async () => {
       try {
@@ -261,6 +277,7 @@ describe('E2E: Vault CLI', () => {
         `--submit-selector "#submit-btn" ` +
         `--username "login@example.com" ` +
         `--password "LoginPass456!" ` +
+        `--allow-http ` +
         `--force`,
         { encoding: 'utf-8', cwd: process.cwd() }
       );
@@ -283,7 +300,7 @@ describe('E2E: Vault CLI', () => {
 
       await visualDelay(800); // Show the auto-filled form
 
-      expect(output).toContain('Login filled for');
+      expect(output).toContain('Login filled successfully');
 
       // Verify form was filled with stored credentials
       const emailValue = await page.inputValue('#email');
@@ -311,13 +328,17 @@ describe('E2E: Vault CLI', () => {
           `node ${CLI_PATH} login --cdp "${wsEndpoint}"`,
           { encoding: 'utf-8', cwd: process.cwd() }
         );
-      }).toThrow(/Unknown RP/);
+      }).toThrow(/No credentials found/);
     });
   });
 
   describe('delete command', () => {
     const testPort = TEST_PORTS[2];
     const testOrigin = `http://127.0.0.1:${testPort}`;
+
+    beforeEach(async () => {
+      await resetRateLimit();
+    });
 
     it('deletes credentials for a site', async () => {
       // First, register credentials
@@ -332,6 +353,7 @@ describe('E2E: Vault CLI', () => {
         `--password-selector "#password" ` +
         `--username "delete@example.com" ` +
         `--password "DeletePass789!" ` +
+        `--allow-http ` +
         `--force`,
         { encoding: 'utf-8', cwd: process.cwd() }
       );
@@ -364,6 +386,10 @@ describe('E2E: Vault CLI', () => {
   });
 
   describe('multiple origins', () => {
+    beforeEach(async () => {
+      await resetRateLimit();
+    });
+
     afterEach(async () => {
       // Clean up all test credentials
       for (const port of TEST_PORTS) {
@@ -386,6 +412,7 @@ describe('E2E: Vault CLI', () => {
 
       // Register credentials for multiple sites
       for (const cred of credentials) {
+        await resetRateLimit(); // Reset rate limit for each registration
         await page.goto(`http://127.0.0.1:${cred.port}`);
         await visualDelay(400);
 
@@ -396,6 +423,7 @@ describe('E2E: Vault CLI', () => {
           `--password-selector "#password" ` +
           `--username "${cred.username}" ` +
           `--password "${cred.password}" ` +
+          `--allow-http ` +
           `--force`,
           { encoding: 'utf-8', cwd: process.cwd() }
         );
@@ -414,6 +442,7 @@ describe('E2E: Vault CLI', () => {
 
       // Test that login fills the correct credentials for each origin
       for (const cred of credentials) {
+        await resetRateLimit(); // Reset rate limit for each login
         await page.goto(`http://127.0.0.1:${cred.port}`);
         await visualDelay(400);
 
