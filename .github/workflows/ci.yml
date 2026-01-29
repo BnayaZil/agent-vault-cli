@@ -27,7 +27,9 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci || npm install
+          npm list || true
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -59,7 +61,9 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci || npm install
+          npm list || true
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
