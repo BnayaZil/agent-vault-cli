@@ -21,6 +21,10 @@ export interface RegisterOptions {
 export async function register(options: RegisterOptions): Promise<void> {
   const { browser, page } = await connectToBrowser(options.cdp);
 
+  // Declare outside try block for cleanup in finally
+  let username = '';
+  let password = '';
+
   try {
     const currentUrl = page.url();
     const origin = extractAndValidateOrigin(currentUrl);
@@ -84,7 +88,6 @@ export async function register(options: RegisterOptions): Promise<void> {
     }
 
     // Get username
-    let username: string;
     if (options.username) {
       username = options.username;
     } else {
@@ -102,7 +105,6 @@ export async function register(options: RegisterOptions): Promise<void> {
     }
 
     // Get password
-    let password: string;
     if (options.password) {
       password = options.password;
     } else if (options.generatePassword) {
