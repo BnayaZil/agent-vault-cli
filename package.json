@@ -14,7 +14,13 @@
     "test": "vitest",
     "test:headful": "HEADFUL=1 vitest --run",
     "lint": "eslint src/",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "demo:auto": "tsx demo/automated-demo.ts",
+    "demo:interactive": "tsx demo/interactive-demo.ts",
+    "demo:manual": "chmod +x demo/manual-demo.sh && ./demo/manual-demo.sh",
+    "demo:video": "cd demo/remotion && npm install && npm run render",
+    "demo:preview": "cd demo/remotion && npm install && npm start",
+    "demo:verify": "tsx demo/verify-setup.ts"
   },
   "keywords": [
     "cli",
@@ -42,6 +48,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.0.0",
     "@types/proper-lockfile": "^4.1.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   },

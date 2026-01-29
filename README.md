@@ -22,6 +22,12 @@ Agent → "log in" → Vault → Browser
 
 > ⚠️ **Early development** — API may change. Feedback welcome.
 
+## Demo Video
+
+> 🎬 **Want to see it in action?** Check out our [demo video creation guide](./demo/QUICKSTART.md) to record your own!
+
+<!-- Add your demo video/gif here after recording -->
+
 ## Quick Start
 
 ```bash
@@ -133,6 +139,23 @@ npm run build
 npm run dev    # watch mode
 npm test
 ```
+
+### Creating Demo Videos
+
+Want to create a demo video? We have scripts for that!
+
+```bash
+# Interactive guided demo (recommended)
+npm run demo:interactive
+
+# Automated demo
+npm run demo:auto
+
+# Create video with Remotion
+npm run demo:video
+```
+
+See [demo/GUIDE.md](./demo/GUIDE.md) for complete instructions.
 
 ---
 
