@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm install --ignore-scripts
       
+      - name: Remove problematic transitive @types
+        run: rm -rf node_modules/@types/estree node_modules/@types/retry node_modules/@types/through
+      
       - name: Rebuild native modules
         run: npm rebuild keytar || true
       
@@ -61,6 +64,9 @@ jobs:
       
       - name: Install dependencies
         run: npm install --ignore-scripts
+      
+      - name: Remove problematic transitive @types
+        run: rm -rf node_modules/@types/estree node_modules/@types/retry node_modules/@types/through
       
       - name: Rebuild native modules
         run: npm rebuild keytar || true
