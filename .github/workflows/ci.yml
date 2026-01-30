@@ -26,15 +26,15 @@ jobs:
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
-      - name: Install dependencies (skip playwright download)
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+      - name: Install dependencies with yarn
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install
         timeout-minutes: 10
       
       - name: Build
-        run: npm run build
+        run: yarn build
       
       - name: Run unit tests only
-        run: npm test -- --run tests/crypto.test.ts tests/security.test.ts
+        run: yarn test --run tests/crypto.test.ts tests/security.test.ts
 
   publish:
     needs: test
@@ -54,12 +54,12 @@ jobs:
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
-      - name: Install dependencies (skip playwright download)
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+      - name: Install dependencies with yarn
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install
         timeout-minutes: 10
       
       - name: Build
-        run: npm run build
+        run: yarn build
       
       - name: Publish to npm
         run: npm publish --access public
