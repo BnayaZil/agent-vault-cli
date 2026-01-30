@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm install --package-lock-only && npm ci
       
+      - name: Debug - list @types packages
+        run: ls -la node_modules/@types/ || echo "No @types directory"
+      
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       
