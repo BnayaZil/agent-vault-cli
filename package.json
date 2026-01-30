@@ -1,5 +1,5 @@
 {
-  "name": "@agent-vault/cli",
+  "name": "agent-vault-cli",
   "version": "0.1.0",
   "description": "Secure credential vault CLI for AI agents - fills login forms via CDP without exposing credentials",
   "type": "module",
