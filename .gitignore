@@ -37,6 +37,7 @@ plan.md
 # Cursor agents and skills
 .cursor/agents/
 .cursor/skills/
+!.cursor/skills/npm-publish/
 .agents/
 .opencode/
 
