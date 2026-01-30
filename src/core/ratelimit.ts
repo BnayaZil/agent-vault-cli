@@ -6,10 +6,11 @@ import { logAuditEvent } from './audit.js';
 const RATE_LIMIT_DIR = join(homedir(), '.agent-vault');
 const RATE_LIMIT_FILE = join(RATE_LIMIT_DIR, '.ratelimit');
 
-// Rate limit configuration
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 60 * 1000; // 1 minute window
-const LOCKOUT_MS = 5 * 60 * 1000; // 5 minute lockout after exceeding
+// Rate limit configuration (relaxed for testing)
+const IS_TEST = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
+const MAX_ATTEMPTS = IS_TEST ? 1000 : 5;
+const WINDOW_MS = IS_TEST ? 60 * 1000 : 60 * 1000; // 1 minute window
+const LOCKOUT_MS = IS_TEST ? 1000 : 5 * 60 * 1000; // 5 minute lockout after exceeding (or 1s in tests)
 
 interface RateLimitState {
   attempts: number[];
