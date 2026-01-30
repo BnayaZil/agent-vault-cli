@@ -39,7 +39,3 @@ plan.md
 .cursor/skills/
 .agents/
 .opencode/
-
-# Remotion best practices skill (across all agent directories)
-**/skills/remotion-best-practices
-**/skills/remotion-best-practices/**
