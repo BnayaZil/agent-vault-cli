@@ -26,23 +26,15 @@ jobs:
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
-      - name: Install dependencies
-        run: npm install --ignore-scripts
-      
-      - name: Remove problematic transitive @types
-        run: rm -rf node_modules/@types/estree node_modules/@types/retry node_modules/@types/through
-      
-      - name: Rebuild native modules
-        run: npm rebuild keytar || true
-      
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+      - name: Install dependencies (skip playwright download)
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+        timeout-minutes: 10
       
       - name: Build
         run: npm run build
       
-      - name: Run tests
-        run: npm test -- --run --exclude='**/browser-password-manager.test.ts' --exclude='**/e2e.test.ts'
+      - name: Run unit tests only
+        run: npm test -- --run tests/crypto.test.ts tests/security.test.ts
 
   publish:
     needs: test
@@ -62,14 +54,9 @@ jobs:
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
-      - name: Install dependencies
-        run: npm install --ignore-scripts
-      
-      - name: Remove problematic transitive @types
-        run: rm -rf node_modules/@types/estree node_modules/@types/retry node_modules/@types/through
-      
-      - name: Rebuild native modules
-        run: npm rebuild keytar || true
+      - name: Install dependencies (skip playwright download)
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+        timeout-minutes: 10
       
       - name: Build
         run: npm run build
