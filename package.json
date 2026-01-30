@@ -14,11 +14,7 @@
     "test": "vitest",
     "test:headful": "HEADFUL=1 vitest --run",
     "lint": "eslint src/",
-    "prepublishOnly": "npm run build",
-    "demo:auto": "tsx demo/automated-demo.ts",
-    "demo:interactive": "tsx demo/interactive-demo.ts",
-    "demo:manual": "chmod +x demo/manual-demo.sh && ./demo/manual-demo.sh",
-    "demo:verify": "tsx demo/verify-setup.ts"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "cli",
