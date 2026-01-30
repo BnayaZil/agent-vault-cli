@@ -150,9 +150,6 @@ npm run demo:interactive
 
 # Automated demo
 npm run demo:auto
-
-# Create video with Remotion
-npm run demo:video
 ```
 
 See [demo/GUIDE.md](./demo/GUIDE.md) for complete instructions.
