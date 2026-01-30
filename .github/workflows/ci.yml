@@ -27,10 +27,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: npm install --package-lock-only && npm ci
+        run: npm install --ignore-scripts
       
-      - name: Debug - list @types packages
-        run: ls -la node_modules/@types/ || echo "No @types directory"
+      - name: Rebuild native modules
+        run: npm rebuild keytar || true
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -60,7 +60,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: npm install --package-lock-only && npm ci
+        run: npm install --ignore-scripts
+      
+      - name: Rebuild native modules
+        run: npm rebuild keytar || true
       
       - name: Build
         run: npm run build
