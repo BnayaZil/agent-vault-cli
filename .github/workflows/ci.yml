@@ -12,29 +12,37 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18.x, 20.x]
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ matrix.node-version }}
       
-      - name: Install system dependencies for keytar
+      # Linux only: libsecret for keytar fallback
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
-      - name: Install dependencies with yarn
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install
+      - name: Install dependencies
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+        shell: bash
         timeout-minutes: 10
       
       - name: Build
-        run: yarn build
+        run: npm run build
       
-      - name: Run unit tests only
-        run: yarn test --run tests/crypto.test.ts tests/security.test.ts
+      - name: Run unit tests
+        run: npm test -- --run tests/crypto.test.ts tests/security.test.ts
 
   publish:
     needs: test
@@ -51,15 +59,15 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       
-      - name: Install system dependencies for keytar
+      - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
-      - name: Install dependencies with yarn
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install
+      - name: Install dependencies
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
         timeout-minutes: 10
       
       - name: Build
-        run: yarn build
+        run: npm run build
       
       - name: Publish to npm
         run: npm publish --access public
