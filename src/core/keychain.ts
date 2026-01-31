@@ -1,4 +1,4 @@
-import * as keytar from '@travelerdev/keytar';
+import keytar from 'keytar';
 import { z } from 'zod';
 import type { RPConfig } from '../types/index.js';
 import { logAuditEvent } from './audit.js';

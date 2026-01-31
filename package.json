@@ -38,7 +38,7 @@
   "dependencies": {
     "commander": "^12.1.0",
     "inquirer": "^9.2.23",
-    "@travelerdev/keytar": "^8.0.0-beta.1",
+    "keytar": "^7.9.0",
     "nanoid": "^5.0.7",
     "playwright": "^1.48.0",
     "proper-lockfile": "^4.1.2",
