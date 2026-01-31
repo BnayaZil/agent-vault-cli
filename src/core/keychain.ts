@@ -1,4 +1,4 @@
-import keytar from '@aspect-build/keytar';
+import keytar from '@travelerdev/keytar';
 import { z } from 'zod';
 import type { RPConfig } from '../types/index.js';
 import { logAuditEvent } from './audit.js';
