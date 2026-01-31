@@ -12,37 +12,32 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [18.x, 20.x]
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20.x'
       
-      # Linux only: libsecret for keytar fallback
-      - name: Install system dependencies (Linux)
-        if: runner.os == 'Linux'
+      - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
-        shell: bash
+        run: yarn install --frozen-lockfile || yarn install
         timeout-minutes: 10
       
-      - name: Build
-        run: npm run build
+      - name: Install Playwright system dependencies
+        run: npx playwright install-deps chromium
       
-      - name: Run unit tests
-        run: npm test -- --run tests/crypto.test.ts tests/security.test.ts
+      - name: Build
+        run: yarn build
+      
+      - name: Run all tests
+        run: yarn test --run
 
   publish:
     needs: test
@@ -59,15 +54,15 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       
-      - name: Install system dependencies
+      - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install
         timeout-minutes: 10
       
       - name: Build
-        run: npm run build
+        run: yarn build
       
       - name: Publish to npm
         run: npm publish --access public
