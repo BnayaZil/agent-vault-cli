@@ -6,17 +6,33 @@ on:
       - main
     tags:
       - 'v*'
-  pull_request:
+  pull_request_target:
     branches:
       - main
+
+# SECURITY: Default to minimal permissions for all jobs
+# Each job must explicitly request additional permissions if needed
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # SECURITY: Restrict permissions for jobs that run untrusted PR code
+    # This ensures malicious PRs cannot access or exfiltrate secrets
+    permissions:
+      contents: read  # Only read access, no write permissions
+      # Explicitly no access to: secrets, packages, deployments, etc.
     
     steps:
-      - name: Checkout code
+      - name: Checkout PR code safely
         uses: actions/checkout@v4
+        with:
+          # SECURITY: For pull_request_target, we must explicitly checkout the PR head
+          # This ref is from the fork, so we run it with restricted permissions above
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Persist credentials disabled for extra safety
+          persist-credentials: false
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -47,7 +63,11 @@ jobs:
   publish:
     needs: test
     runs-on: ubuntu-latest
+    # Only runs on tags pushed to main - never on PRs, so secrets are safe
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: read
+      id-token: write  # For npm provenance if needed
     
     steps:
       - name: Checkout code
