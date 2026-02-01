@@ -18,26 +18,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          cache: 'pnpm'
       
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: yarn install --frozen-lockfile || yarn install
+        run: pnpm install --frozen-lockfile || pnpm install
         timeout-minutes: 10
       
       - name: Install Playwright system dependencies
-        run: npx playwright install-deps chromium
+        run: pnpm exec playwright install-deps chromium
       
       - name: Build
-        run: yarn build
+        run: pnpm build
       
       - name: Run all tests
-        run: yarn test --run
+        run: pnpm test --run
 
   publish:
     needs: test
@@ -48,21 +54,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
       
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn install
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install
         timeout-minutes: 10
       
       - name: Build
-        run: yarn build
+        run: pnpm build
       
       - name: Publish to npm
         run: npm publish --access public
