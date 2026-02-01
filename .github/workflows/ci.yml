@@ -27,13 +27,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'pnpm'
       
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install
         timeout-minutes: 10
       
       - name: Install Playwright system dependencies
@@ -64,7 +63,6 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
       
       - name: Install system dependencies for keytar
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
