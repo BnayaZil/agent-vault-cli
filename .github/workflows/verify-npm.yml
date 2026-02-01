@@ -1,0 +1,40 @@
+name: Verify Published NPM Package
+
+on:
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install published package globally
+        run: npm install -g agent-vault-cli
+
+      - name: Verify CLI is accessible
+        run: vault --version
+
+      - name: Test help command
+        run: vault --help
+
+      - name: Test list command (empty vault)
+        run: vault list
+
+      - name: Install Playwright browsers
+        run: npx playwright-chromium install chromium
+
+      - name: Test store and retrieve (basic flow)
+        run: |
+          # Store a test credential
+          vault store --service "test-service" --username "testuser" --password "testpass123"
+          
+          # List to verify it was stored
+          vault list
+          
+          # Show the credential exists
+          vault show test-service
