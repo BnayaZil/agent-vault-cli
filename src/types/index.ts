@@ -29,3 +29,18 @@ export interface VaultConfig {
 }
 
 export type ConfigKey = keyof VaultConfig;
+
+// API Credential types (for vault curl and register-api commands)
+export interface APICredential {
+  name: string;              // e.g., "personal-token", "ci-token" (MUST be unique per origin)
+  description?: string;      // User-friendly description
+  token: string;             // The actual secret
+  createdAt: string;         // ISO timestamp
+  lastUsedAt?: string;       // ISO timestamp
+}
+
+export interface APICredentials {
+  origin: string;
+  credentials: APICredential[];  // names must be unique within this array
+  defaultCredential?: string;    // Name of default credential
+}

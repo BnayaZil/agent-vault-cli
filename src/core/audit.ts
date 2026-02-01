@@ -11,12 +11,19 @@ export type AuditEvent =
   | 'credential_deleted'
   | 'login_filled'
   | 'config_changed'
-  | 'rate_limit_exceeded';
+  | 'rate_limit_exceeded'
+  | 'api_credential_stored'
+  | 'api_credential_listed'
+  | 'api_request_executed'
+  | 'api_credential_deleted';
 
 interface AuditEntry {
   timestamp: string;
   event: AuditEvent;
   origin?: string;
+  credentialName?: string;      // Which credential was used
+  httpMethod?: string;          // For API requests
+  exitCode?: number;            // For curl command exit code
   details?: string;
   success: boolean;
 }
@@ -31,7 +38,14 @@ async function ensureAuditDir(): Promise<void> {
  */
 export async function logAuditEvent(
   event: AuditEvent,
-  options: { origin?: string; details?: string; success?: boolean } = {}
+  options: {
+    origin?: string;
+    credentialName?: string;
+    httpMethod?: string;
+    exitCode?: number;
+    details?: string;
+    success?: boolean;
+  } = {}
 ): Promise<void> {
   try {
     await ensureAuditDir();
@@ -40,6 +54,9 @@ export async function logAuditEvent(
       timestamp: new Date().toISOString(),
       event,
       origin: options.origin,
+      credentialName: options.credentialName,
+      httpMethod: options.httpMethod,
+      exitCode: options.exitCode,
       details: options.details,
       success: options.success ?? true,
     };
