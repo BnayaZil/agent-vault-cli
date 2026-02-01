@@ -7,6 +7,11 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
+      - name: Install system dependencies for keytar
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev gnome-keyring dbus-x11
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -23,13 +28,21 @@ jobs:
         run: vault --help
 
       - name: Test list command (empty vault)
-        run: vault list
+        run: |
+          # Initialize keyring for headless environment
+          eval "$(dbus-launch --sh-syntax)"
+          echo "" | gnome-keyring-daemon --unlock
+          vault list
 
       - name: Install Playwright browsers
         run: npx playwright-chromium install chromium
 
       - name: Test store and retrieve (basic flow)
         run: |
+          # Initialize keyring for headless environment
+          eval "$(dbus-launch --sh-syntax)"
+          echo "" | gnome-keyring-daemon --unlock
+          
           # Store a test credential
           vault store --service "test-service" --username "testuser" --password "testpass123"
           
