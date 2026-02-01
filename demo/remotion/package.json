@@ -1,0 +1,27 @@
+{
+  "name": "agent-vault-demo-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remotion video demo for Agent Vault CLI",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion bundle",
+    "render": "remotion render DemoVideo out/demo.mp4",
+    "render:register": "remotion render RegisterDemo out/register.mp4",
+    "render:login": "remotion render LoginDemo out/login.mp4",
+    "render:all": "npm run render && npm run render:register && npm run render:login",
+    "render:gif": "remotion render DemoVideo out/demo.gif --image-format=png"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.6.0"
+  }
+}
