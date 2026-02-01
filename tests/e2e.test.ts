@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { chromium, Browser } from 'playwright';
+import { chromium, Browser } from 'playwright-chromium';
 import { execSync, spawn, ChildProcess } from 'child_process';
 import { startTestServer, TestServer } from './fixtures/server.js';
 import { deleteRP, getRP } from '../src/core/keychain.js';
