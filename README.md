@@ -24,9 +24,7 @@ Agent → "log in" → Vault → Browser
 
 ## Demo Video
 
-> 🎬 **Want to see it in action?** Check out our [demo video creation guide](./demo/QUICKSTART.md) to record your own!
-
-<!-- Add your demo video/gif here after recording -->
+![Agent Vault CLI Demo](./demo/remotion/out/demo.gif)
 
 ## Quick Start
 
