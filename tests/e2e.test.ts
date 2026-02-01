@@ -83,6 +83,8 @@ describe('E2E: Vault CLI', () => {
       '--no-default-browser-check',
       '--disable-extensions',
       '--disable-dev-shm-usage',
+      '--no-sandbox', // Required for CI environments (GitHub Actions, Docker)
+      '--disable-setuid-sandbox',
     ];
 
     // Add headless flag only if not in headful mode
