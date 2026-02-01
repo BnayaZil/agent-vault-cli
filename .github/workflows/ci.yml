@@ -70,7 +70,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       
       - name: Install dependencies
-        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install --frozen-lockfile || PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pnpm install
         timeout-minutes: 10
       
       - name: Build
