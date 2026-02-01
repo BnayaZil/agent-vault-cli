@@ -1,4 +1,4 @@
-import type { Page } from 'playwright';
+import type { Page } from 'playwright-chromium';
 
 const USERNAME_SELECTORS = [
   'input[type="email"]',

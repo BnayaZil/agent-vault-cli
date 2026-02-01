@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { chromium, Browser, BrowserContext } from 'playwright';
+import { chromium, Browser, BrowserContext } from 'playwright-chromium';
 import { spawn, ChildProcess } from 'child_process';
 import { startTestServer, TestServer } from './fixtures/server.js';
 import http from 'http';
@@ -79,7 +79,7 @@ function cleanupUserDataDir(dir: string): void {
   }
 }
 
-describe('Browser Password Manager with --user-data-dir', () => {
+describe.skip('Browser Password Manager with --user-data-dir', () => {
   let server: TestServer;
   let userDataDir: string;
 

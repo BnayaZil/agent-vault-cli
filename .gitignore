@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 package-lock.json
+yarn.lock
+.yarn/
+.pnp.*
 
 # Build output
 dist/
@@ -26,6 +29,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+.npmrc
 
 # Temporary files
 tmp/

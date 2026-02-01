@@ -16,8 +16,8 @@ export interface RPConfig {
 }
 
 export interface BrowserConnection {
-  browser: import('playwright').Browser;
-  page: import('playwright').Page;
+  browser: import('playwright-chromium').Browser;
+  page: import('playwright-chromium').Page;
 }
 
 export interface VaultConfig {

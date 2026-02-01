@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-chromium';
 import type { BrowserConnection } from '../types/index.js';
 import { getConfigValue } from './config.js';
 
