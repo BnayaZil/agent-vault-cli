@@ -27,27 +27,16 @@ jobs:
       - name: Test help command
         run: vault --help
 
-      - name: Test list command (empty vault)
+      - name: Test subcommand help
+        run: |
+          vault register --help
+          vault login --help
+          vault delete --help
+          vault config --help
+
+      - name: Test config list (empty)
         run: |
           # Initialize keyring for headless environment
           eval "$(dbus-launch --sh-syntax)"
           echo "" | gnome-keyring-daemon --unlock
-          vault list
-
-      - name: Install Playwright browsers
-        run: npx playwright-chromium install chromium
-
-      - name: Test store and retrieve (basic flow)
-        run: |
-          # Initialize keyring for headless environment
-          eval "$(dbus-launch --sh-syntax)"
-          echo "" | gnome-keyring-daemon --unlock
-          
-          # Store a test credential
-          vault store --service "test-service" --username "testuser" --password "testpass123"
-          
-          # List to verify it was stored
-          vault list
-          
-          # Show the credential exists
-          vault show test-service
+          vault config list
